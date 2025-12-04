@@ -7,11 +7,12 @@
           <!-- Logo -->
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <el-icon :size="24" color="#fff">
+              <el-icon class="text-white" size="24">
                 <CircleCheck />
               </el-icon>
             </div>
             <h1 class="text-2xl font-bold text-gray-800">Todo Manager</h1>
+
           </div>
 
 
