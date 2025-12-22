@@ -6,20 +6,24 @@ import { ElMessage } from 'element-plus';
 export const useAuthStore = defineStore('auth', () => {
     // State
     const user = ref(null);
-    const token = ref(null);
+    const accessToken = ref(null);
+    const refreshToken = ref(null);
     const loading = ref(false);
 
     // Computed
-    const isLoggedIn = computed(() => !!token.value);
+    const isLoggedIn = computed(() => !!accessToken.value);
 
     // Initialize from localStorage
     const initAuth = () => {
-        const savedToken = localStorage.getItem('token');
+        const saveAccessToken = localStorage.getItem('accessToken');
+        const saveRefreshToken = localStorage.getItem('refreshToken');
         const savedUser = localStorage.getItem('user');
 
-        if (savedToken && savedUser) {
-            token.value = savedToken;
+        if (saveRefreshToken && saveAccessToken) {
+            accessToken.value = saveAccessToken;
+            refreshToken.value = saveRefreshToken;
             user.value = JSON.parse(savedUser);
+
         }
     };
 
@@ -29,10 +33,13 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const response = await authAPI.login(credentials);
 
-            token.value = response.token;
+            accessToken.value = response.accessToken;
+            refreshToken.value = response.refreshToken;
+
             user.value = response.user;
 
-            localStorage.setItem('token', response.token);
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('user', JSON.stringify(response.user));
 
             ElMessage.success('Đăng nhập thành công!');
@@ -50,10 +57,12 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const response = await authAPI.register(userData);
 
-            token.value = response.token;
+            accessToken.value = response.accessToken;
+            refreshToken.value = response.refreshToken;
             user.value = response.user;
 
-            localStorage.setItem('token', response.token);
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('user', JSON.stringify(response.user));
 
             ElMessage.success('Đăng ký thành công!');
@@ -66,17 +75,26 @@ export const useAuthStore = defineStore('auth', () => {
         }
     };
 
-    const logout = () => {
-        user.value = null;
-        token.value = null;
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        ElMessage.success('Đăng xuất thành công!');
+    const logout = async () => {
+        try {
+            await authAPI.logout();
+        } catch (error) {
+            console.error('Logout error: ', error);
+        } finally {
+            user.value = null;
+            accessToken.value = null;
+            refreshToken.value = null;
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            ElMessage.success('Đăng xuất thành công');
+        }
     };
 
     return {
         user,
-        token,
+        accessToken,
+        refreshToken,
         loading,
         isLoggedIn,
         initAuth,

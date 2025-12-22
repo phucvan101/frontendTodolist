@@ -56,6 +56,8 @@
                 <!-- Actions -->
                 <div class="flex gap-2">
                     <el-button type="primary" :icon="Edit" circle @click="handleEdit(task)" />
+                    <el-button v-if="!task.isDeleted" type="success" :icon="Share" circle @click="handleShare(task)"
+                        title="Chia sẻ" />
                     <el-button type="danger" :icon="Delete" circle @click="handleDelete(task)" />
                 </div>
             </div>
@@ -71,7 +73,7 @@
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue';
-import { Edit, Delete, Calendar, Clock, CircleCheck } from '@element-plus/icons-vue';
+import { Edit, Delete, Calendar, Clock, CircleCheck, Share } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 import { useTaskStore } from '@/stores/taskStore';
 
@@ -140,6 +142,8 @@ const handleDelete = async (task) => {
         await taskStore.deleteTask(task._id);
     } catch (error) {
         // User cancelled
+    } finally {
+        taskStore.fetchTasks();
     }
 };
 
@@ -147,5 +151,9 @@ const handlePageChange = (page) => {
     // update local page immediately for responsive UI and fetch that page from the store
     currentPage.value = page;
     taskStore.fetchTasks(page);
+};
+
+const handleShare = (task) => {
+    emit('share-task', task);
 };
 </script>
