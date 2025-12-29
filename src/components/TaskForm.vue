@@ -12,6 +12,18 @@
             </el-form-item>
 
             <div class="grid grid-cols-2 gap-4">
+                <el-form-item label="Danh mục" prop="category">
+                    <el-select v-model="form.category" placeholder="Chọn danh mục" class="w-full" clearable>
+                        <el-option v-for="cat in categoryStore.categories" :key="cat._id" :label="cat.name"
+                            :value="cat._id">
+                            <div class="flex items-center gap-2">
+                                <span>{{ cat.icon }}</span>
+                                <span>{{ cat.name }}</span>
+                                <div class="w-3 h-3 rounded-full ml-auto" :style="{ backgroundColor: cat.color }"></div>
+                            </div>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="Độ ưu tiên" prop="priority">
                     <el-select v-model="form.priority" placeholder="Chọn độ ưu tiên" class="w-full">
                         <el-option label="Thấp" value="low">
@@ -133,13 +145,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
 import { EditPen, Calendar } from '@element-plus/icons-vue';
 import { useTaskStore } from '@/stores/taskStore';
+import { useCategoryStore } from '@/stores/categoryStore';
 import dayjs from 'dayjs'
 
 
 const taskStore = useTaskStore();
+const categoryStore = useCategoryStore();
+
+onMounted(() => {
+    if (!categoryStore.categories.length) {
+        categoryStore.fetchCategories();
+        console.log('c: ', categoryStore.categories)
+    }
+});
+
 
 const props = defineProps({
     visible: Boolean,
@@ -175,6 +197,7 @@ const form = reactive({
     description: '',
     priority: '',
     dueDate: '',
+    category: null,
     status: 'pending',
     attachments: [],
     tags: [],
@@ -193,6 +216,7 @@ const resetForm = () => {
         description: '',
         priority: '',
         dueDate: '',
+        category: null,
         status: 'pending',
         tags: [],
         attachments: [],
@@ -210,10 +234,10 @@ watch(() => props.task, (newTask) => {
             priority: newTask.priority || '',
             dueDate: newTask.dueDate || '',
             status: newTask.status,
+            category: newTask.category || null,
             tags: newTask.tags,
             attachments: newTask.attachments,
         });
-        console.log('fetchDetail: ', form)
     } else {
         editMode.value = false;
         resetForm();
@@ -238,7 +262,10 @@ const handleSubmit = async () => {
                 );
             }
             else {
-                await taskStore.createTask(form, selectedFiles);
+                const payload = JSON.parse(JSON.stringify(form));
+                // console.log('SEND PAYLOAD:', payload);
+                // console.log('CATEGORY:', payload.category, typeof payload.category);
+                await taskStore.createTask(payload, selectedFiles);
             }
 
             handleClose();

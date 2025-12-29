@@ -84,4 +84,10 @@ export const taskAPI = {
     })
 };
 
+// Category APIs
+
+export const categoryAPI = {
+    getAll: (params) => api.get('/categories', { params }),
+}
+
 export default api;

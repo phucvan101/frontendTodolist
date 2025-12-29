@@ -67,6 +67,7 @@ export const useTaskStore = defineStore('task', () => {
 
             formData.append('title', taskData.title);
             formData.append('description', taskData.description);
+            formData.append('category', taskData.category)
             formData.append('priority', taskData.priority);
             formData.append('dueDate', taskData.dueDate);
             formData.append('status', taskData.status);
@@ -101,6 +102,7 @@ export const useTaskStore = defineStore('task', () => {
 
             formData.append('title', taskData.title);
             formData.append('description', taskData.description);
+            formData.append('category', taskData.category);
             formData.append('priority', taskData.priority);
             formData.append('dueDate', taskData.dueDate);
             formData.append('status', taskData.status);
