@@ -27,6 +27,11 @@
             </el-tooltip>
 
             <div v-if="authStore.isLoggedIn" class="flex items-center gap-4">
+              <el-tooltip content="Quản lý danh mục">
+                <el-button :icon="FolderOpened" circle @click="showCategoryManager = true" />
+              </el-tooltip>
+
+
               <div class="flex items-center gap-2">
                 <el-avatar :size="36" :icon="UserFilled" />
                 <span class="font-medium text-gray-700 dark:text-gray-200">{{ authStore.user?.name }}</span>
@@ -118,6 +123,9 @@
     <!-- Task Drawer -->
     <TaskForm v-model:visible="showTaskDrawer" :task="editingTask" @success="handleTaskSuccess" />
 
+    <!-- Category Manager -->
+    <CategoryManager v-model:visible="showCategoryManager" />
+
     <!-- Share Task Dialog -->
     <ShareTaskDialog v-model:visible="showShareDialog" :task="sharingTask" @success="handleShareSuccess" />
   </el-main>
@@ -127,16 +135,20 @@
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useTaskStore } from '@/stores/taskStore';
+import { FolderOpened } from '@element-plus/icons-vue';
 
 import LoginForm from './components/LoginForm.vue';
 import TaskForm from './components/TaskForm.vue';
 import TaskList from './components/TaskList.vue';
 import ShareTaskDialog from './components/ShareTaskDialog.vue';
+import CategoryManager from './components/CategoryManager.vue';
 const authStore = useAuthStore();
 const taskStore = useTaskStore();
 const showLoginDialog = ref(false);
 const showTaskDrawer = ref(false);
 const showShareDialog = ref(false);
+const showCategoryManager = ref(false);
+
 
 const sharingTask = ref(null);
 

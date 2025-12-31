@@ -88,6 +88,9 @@ export const taskAPI = {
 
 export const categoryAPI = {
     getAll: (params) => api.get('/categories', { params }),
+    create: (data) => api.post('/categories/create', data),
+    update: (id, data) => api.post(`/categories/update/${id}`, data),
+    delete: (id) => api.post(`/categories/delete/${id}`)
 }
 
 export default api;
