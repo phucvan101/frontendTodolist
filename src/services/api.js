@@ -93,4 +93,27 @@ export const categoryAPI = {
     delete: (id) => api.post(`/categories/delete/${id}`)
 }
 
+// Comment APIs
+export const commentAPI = {
+    getAll: (taskId) => api.get(`/comments/${taskId}`),
+    create: (taskId, data) => api.post(`/comments/create/${taskId}`, data),
+    update: (commentId, data) => api.post(`/comments/update/${commentId}`, data),
+}
+
+// AI APIs
+export const aiAPI = {
+    // Generate task from short description
+    generateTask: (description) => api.post('/ai/generate-task', { description }),
+
+    // Generate tasks from a list of descriptions
+    batchGenerate: (descriptions) => api.post('/ai/batch-generate', { descriptions }),
+
+
+    // Breakdown task into subtasks
+    breakdownTask: (title, description) => api.post('/ai/breakdown-task', {
+        title,
+        description
+    }),
+}
+
 export default api;

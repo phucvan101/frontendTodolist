@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { taskAPI } from '@/services/api';
 import { ElMessage } from 'element-plus';
+import { fi } from 'element-plus/es/locale/index.mjs';
 
 export const useTaskStore = defineStore('task', () => {
     // State
@@ -17,7 +18,7 @@ export const useTaskStore = defineStore('task', () => {
     const searchTerm = ref('');
     const filterStatus = ref('all');
     const filterPriority = ref('all');
-    // const filterCategory = ref('');
+    const filterCategory = ref('');
     const sortBy = ref('createdAt');
 
     // Computed
@@ -32,8 +33,8 @@ export const useTaskStore = defineStore('task', () => {
     const inProgressTasks = computed(() => tasks.value.filter(t => t.status === 'in-progress' && !t.isDeleted));
 
     const urgentTasks = computed(() =>
-        task.value.filter(t => t.priority === 'urgent' && !t.isDeleted)
-    )
+        tasks.value.filter(t => t.priority === 'urgent' && !t.isDeleted)
+    );
 
     // Actions
     const fetchTasks = async (page = 1) => {
@@ -47,7 +48,10 @@ export const useTaskStore = defineStore('task', () => {
                 priority: filterPriority.value,
                 sortBy: sortBy.value,
                 search: searchTerm.value,
+                category: filterCategory.value
             };
+
+            console.log('payload: ', params);
 
             const response = await taskAPI.getAll(params);
             tasks.value = response.tasks;
@@ -102,9 +106,13 @@ export const useTaskStore = defineStore('task', () => {
 
             formData.append('title', taskData.title);
             formData.append('description', taskData.description);
-            formData.append('category', taskData.category);
+            if (taskData.category) {
+                formData.append('category', taskData.category);
+            }
             formData.append('priority', taskData.priority);
-            formData.append('dueDate', taskData.dueDate);
+            if (taskData.dueDate) {
+                formData.append('dueDate', taskData.dueDate);
+            }
             formData.append('status', taskData.status);
 
             taskData.tags?.forEach(tag => {
@@ -112,12 +120,12 @@ export const useTaskStore = defineStore('task', () => {
             });
 
             // 🔥 gửi id file bị xoá
-            removedAttachmentIds.value.forEach(id => {
+            removedAttachmentIds.value?.forEach(id => {
                 formData.append('removeAttachments[]', id);
             });
 
             // 🔥 chỉ gửi FILE MỚI
-            selectedFiles.value.forEach(file => {
+            selectedFiles.value?.forEach(file => {
                 formData.append('attachments', file);
             });
 
@@ -158,7 +166,7 @@ export const useTaskStore = defineStore('task', () => {
             'done': 'pending'
         }
         const newStatus = statusMap[task.status] || 'pending';
-        await updateTask(task._id, { ...task, status: newStatus });
+        await updateTask(task._id, { ...task, status: newStatus }, [], []);
     };
 
     const shareTask = async (id, taskData) => {
@@ -200,9 +208,13 @@ export const useTaskStore = defineStore('task', () => {
         pagination,
         searchTerm,
         filterStatus,
+        filterCategory,
         sortBy,
         pendingTasks,
         completedTasks,
+        inProgressTasks,
+        urgentTasks,
+        filterPriority,
         fetchTasks,
         createTask,
         updateTask,

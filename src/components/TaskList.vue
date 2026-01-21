@@ -30,12 +30,15 @@
 
                     <div class="flex items-center gap-3 flex-wrap">
                         <!-- Status Tag -->
-                        <el-tag :type="task.status === 'done' ? 'success' : 'warning'" effect="light" size="default">
+                        <el-tag :type="checkStatus(task.status)" effect="light" size="default">
                             <el-icon class="mr-1">
                                 <CircleCheck v-if="task.status === 'done'" />
-                                <Clock v-else />
+                                <Clock v-if="task.status === 'pending'" />
+                                <Loading v-if="task.status === 'in-progress'" />
                             </el-icon>
-                            {{ task.status === 'done' ? 'Hoàn thành' : 'Đang làm' }}
+                            <span v-if="task.status === 'done'">Hoàn thành</span>
+                            <span v-else-if="task.status === 'pending'">Chưa bắt đầu</span>
+                            <span v-else-if="task.status === 'in-progress'">Đang làm</span>
                         </el-tag>
 
                         <!-- Due Date -->
@@ -55,6 +58,8 @@
 
                 <!-- Actions -->
                 <div class="flex gap-2">
+                    <el-button v-if="!task.isDeleted" type="primary" :icon="ChatDotRound" circle
+                        @click="handleComment(task)" title="Comment" />
                     <el-button type="primary" :icon="Edit" circle @click="handleEdit(task)" />
                     <el-button v-if="!task.isDeleted" type="success" :icon="Share" circle @click="handleShare(task)"
                         title="Chia sẻ" />
@@ -73,7 +78,7 @@
 
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue';
-import { Edit, Delete, Calendar, Clock, CircleCheck, Share } from '@element-plus/icons-vue';
+import { Edit, Delete, Calendar, Clock, CircleCheck, Share, ChatDotRound, Loading } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 import { useTaskStore } from '@/stores/taskStore';
 
@@ -120,7 +125,17 @@ const formatDate = (date) => {
 };
 
 const handleToggleStatus = async (task) => {
-    await taskStore.toggleTaskStatus(task);
+    try {
+        await taskStore.toggleTaskStatus(task);
+    } catch (error) {
+        console.error('Toggle task status error:', error);
+    } finally {
+        taskStore.fetchTasks();
+    }
+};
+
+const handleComment = (task) => {
+    emit('comment-task', task);
 };
 
 const handleEdit = (task) => {
@@ -156,4 +171,17 @@ const handlePageChange = (page) => {
 const handleShare = (task) => {
     emit('share-task', task);
 };
+
+// hàm kiểm tra trạng thái 
+const checkStatus = (status) => {
+    if (status === 'done') {
+        return 'success'
+    }
+    if (status === 'pending') {
+        return 'info'
+    }
+    if (status === 'in-progress') {
+        return 'warning'
+    }
+}
 </script>
